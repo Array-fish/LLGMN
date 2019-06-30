@@ -124,7 +124,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="approximate_LLGMN.cpp" />
-    <ClCompile Include="Source.cpp" />
+    <ClCompile Include="aSource.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="approximate_LLGMN.h" />

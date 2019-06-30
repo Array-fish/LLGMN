@@ -25,7 +25,7 @@ llgmn::llgmn(const int input_size,const int class_num,const int component_size, 
 void llgmn::forward(const vector<vector<double>> &input_data, const vector<vector<double>>& teacher_data) {
 	for (int n = 0; n < input_data.size(); ++n) {
 		set_teacher_data(teacher_data[n]);
-		input_transformation(input_data[n]);
+		input_loglinearization(input_data[n]);
 		calc_second_layer_output(calc_second_layer_input());
 		calc_third_layer_input();
 		pool_update_val();
@@ -48,10 +48,12 @@ void llgmn::init_weight() {
 		}
 		// ‚È‚ñ‚©‘‚¢‚Ä‚ ‚Á‚½C³‚µ‘æ2‘w‚Ìà–¾‚Å‘‚¢‚Ä‚ ‚Á‚½‚Ì‚Å‚±‚±‚Åd‚Ý‚ð0‚É‚·‚é‚Ì‚ª³‚µ‚¢‚©‚Ç‚¤‚©‚Í‚í‚©‚ç‚È‚¢
 		// ‚¤‚Ü‚­‚¢‚©‚È‚Á‚½‚ç‘æ2‘w‚Ì“ü—Í‚ðŒvŽZ‚·‚é‚Æ‚±‚ë‚Å0‚Æ‚µ‚Äˆµ‚¤‚æ‚¤‚É•ÏX‚·‚éD
+		// Œ‹‹Ç‚±‚Ì0‚Á‚Ä‰½‚È‚ñ‚¾‚ë‚¤‚ËD
 		weight[input][class_num - 1][component_size - 1] = 0;
 	}
 }
-void llgmn::input_transformation(const vector<double>& input) {
+
+void llgmn::input_loglinearization(const vector<double>& input) {
 	modified_input.clear();
 	modified_input.push_back(1);
 	for (int i = 0; i < input_size; ++i) {

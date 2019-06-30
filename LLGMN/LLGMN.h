@@ -31,7 +31,7 @@ private:
 	vector<vector<vector<double>>> sum_update_val;
 	// function
 	void init_weight();
-	void input_transformation(const vector<double>& input);
+	void input_loglinearization(const vector<double>& input);
 	vector<vector<double>> calc_second_layer_input();
 	void calc_second_layer_output(const vector<vector<double>>& second_input);
 	void calc_third_layer_input();

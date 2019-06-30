@@ -30,7 +30,7 @@ int main() {
 		output_data = get_vector_from_file("lea_T_sig.csv");
 		test_input_data = get_vector_from_file("dis_sig.csv");
 		test_output_data = get_vector_from_file("dis_T_sig.csv");
-		// スライド作る用データ取得
+		// スライド作るようデータ取得
 		ofstream ofs("error_data005.csv");
 		ofstream ofs1("output_data000.csv");
 		// データ処理部
@@ -44,7 +44,7 @@ int main() {
 			for (auto out : tmp_output) {
 				ofs1 << out << ",";
 			}
-			decltype(tmp_output)::iterator max_itr = max_element(tmp_output.begin(),tmp_output.end());
+			decltype(tmp_output)::iterator max_itr = max_element(tmp_output.begin(), tmp_output.end());
 			for (decltype(tmp_output)::iterator itr = tmp_output.begin(); itr != tmp_output.end(); itr++) {
 				if (itr == max_itr) {
 					ofs1 << "1,";
@@ -72,7 +72,7 @@ int main() {
 vector<vector<double>> get_vector_from_file(const string filename) {
 	ifstream ifs(filename);
 	if (ifs.fail()) {
-		throw "Can't open "+ filename;
+		throw "Can't open " + filename;
 	}
 	string str, str1;
 	vector<vector<double>> data;
