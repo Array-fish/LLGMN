@@ -86,6 +86,27 @@ void llgmn::calc_second_layer_output(const vector<vector<double>>& second_input)
 		}
 	}
 }
+// 省略後
+void llgmn::approximate_second_layer_output(const vector<vector<double>>& second_input) {
+	double sum_exp = 0;
+	vector<vector<double>> exp_input(class_num, vector<double>(component_size));
+	for (int cls = 0; cls < class_num; ++cls) {
+		for (int com = 0; com < component_size; ++com) {
+			int floor_inp = floor(second_input[cls][com]);
+			double decimal_inp = second_input[cls][com] - floor_inp;
+			// 論文にn = 1で良いらしいって書いてあるからそうするよ．
+			//                       　　 2^alpha               beta(a + b)  n=1よりa,bともに1
+			exp_input[cls][com] = (2 << (floor_inp - 1)) * (decimal_inp + 1);
+			sum_exp += exp_input[cls][com];
+		}
+	}
+	for (int cls = 0; cls < class_num; ++cls) {
+		for (int com = 0; com < component_size; ++com) {
+			second_output[cls][com] = exp_input[cls][com] / sum_exp;
+		}
+	}
+
+}
 void llgmn::calc_third_layer_input() {
 	for (int cls = 0; cls < class_num; ++cls) {
 		output[cls] = accumulate(second_output[cls].begin(), second_output[cls].end(), 0.0);

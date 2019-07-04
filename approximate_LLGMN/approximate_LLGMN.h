@@ -35,6 +35,7 @@ private:
 	void input_transformation(const vector<double>& input);
 	vector<vector<double>> calc_second_layer_input();
 	void calc_second_layer_output(const vector<vector<double>>& second_input);
+	void approximate_second_layer_output(const vector<vector<double>>& second_input);
 	void calc_third_layer_input();
 	void pool_energy_func();
 	void pool_update_val();
