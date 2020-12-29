@@ -5,12 +5,12 @@ using namespace std;
 class llgmn {
 private:
 	vector<double> modified_input;
-	const int modified_input_size;
-	const int input_size;
+	const int modified_input_dim;
+	const int input_dim;
 	const int class_num;
 	double initial_J;// ターミナルアトラクタ用
 	// 学習率
-	const double inpsilon;
+	const double learning_rate;
 	// クラスのコンポーネントの数　コンポーネントの数はクラスごとに変わるのか？
 	// 今回は入力が面倒なので各クラスでコンポーネント数は同じとして実装する．
 	//vector<int> component_num_for_class;
@@ -42,7 +42,7 @@ private:
 	void set_teacher_data(const vector<double>& teacher_data);
 	double terminal_attractor(double beta, const vector<vector<vector<double>>>& dj_dw, double learning_time);
 public:
-	llgmn(const int input_size, const int class_num, const int component_size, const double inpsilon);
+	llgmn(const int input_dim, const int class_num, const int component_size, const double inpsilon);
 	virtual ~llgmn() {};
 	// 前方向に計算をしてエネルギー関数を出す．
 	void forward(const vector<vector<double>>& input_data,const vector<vector<double>> &teacher_data);

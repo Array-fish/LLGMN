@@ -5,22 +5,22 @@
 #include<algorithm>
 #include<string>
 using namespace std;
-llgmn::llgmn(const int input_size,const int class_num,const int component_size, const double inpsilon):
-	input_size(input_size),
+llgmn::llgmn(const int input_dim,const int class_num,const int component_size, const double learning_rate):
+	input_dim(input_dim),
 	class_num(class_num),
 	component_size(component_size),
-	inpsilon(inpsilon),
-	modified_input_size(1 + input_size * (input_size + 3) / 2),
+	learning_rate(learning_rate),
+	modified_input_dim(1 + input_dim * (input_dim + 3) / 2),
 	sum_error(0)
 {
 	// vectorの要素数とかをコンストラクタ内でこうやって初期化するべきなのかわからない．
-	weight = vector<vector<vector<double>>>(modified_input_size,vector<vector<double>>(class_num,vector<double>(component_size,0)));
+	weight = vector<vector<vector<double>>>(modified_input_dim,vector<vector<double>>(class_num,vector<double>(component_size,0)));
 	init_weight();
 	output = vector<double>(class_num);
 	teacher_data = vector<double>(class_num);
-	modified_input.reserve(modified_input_size);
+	modified_input.reserve(modified_input_dim);
 	second_output = vector<vector<double>>(class_num, vector<double>(component_size));
-	sum_update_val = vector<vector<vector<double>>>(modified_input_size, vector<vector<double>>(class_num, vector<double>(component_size, 0)));
+	sum_update_val = vector<vector<vector<double>>>(modified_input_dim, vector<vector<double>>(class_num, vector<double>(component_size, 0)));
 }
 void llgmn::forward(const vector<vector<double>> &input_data, const vector<vector<double>>& teacher_data) {
 	for (int n = 0; n < input_data.size(); ++n) {
@@ -40,7 +40,7 @@ void llgmn::init_weight() {
 	std::random_device rnd;
 	std::mt19937 mt(rnd());
 	std::uniform_real_distribution<> rand01(0, 1.0);    // [0, 1.0]
-	for (int input = 0; input < modified_input_size; ++input) {
+	for (int input = 0; input < modified_input_dim; ++input) {
 		for (int classi = 0; classi < class_num; ++classi) {
 			for (int com = 0; com < component_size; ++com) {
 				weight[input][classi][com] = rand01(mt);
@@ -56,11 +56,11 @@ void llgmn::init_weight() {
 void llgmn::input_loglinearization(const vector<double>& input) {
 	modified_input.clear();
 	modified_input.push_back(1);
-	for (int i = 0; i < input_size; ++i) {
+	for (int i = 0; i < input_dim; ++i) {
 		modified_input.push_back(input[i]);
 	}
-	for (int i = 0; i < input_size; ++i) {
-		for (int n = i; n < input_size; ++n) {
+	for (int i = 0; i < input_dim; ++i) {
+		for (int n = i; n < input_dim; ++n) {
 			modified_input.push_back(input[i] * input[n]);
 		}
 	}
@@ -69,7 +69,7 @@ vector<vector<double>> llgmn::calc_second_layer_input() {
 	vector <vector<double>> second_input(class_num,vector<double>(component_size,0));
 	for (int cls = 0; cls < class_num; ++cls) {
 		for (int com = 0; com < component_size; ++com) {
-			for (int mi = 0; mi < modified_input_size; ++mi) {
+			for (int mi = 0; mi < modified_input_dim; ++mi) {
 				second_input[cls][com] += modified_input[mi] * weight[mi][cls][com];
 			}
 		}
@@ -104,7 +104,7 @@ void llgmn::pool_energy_func() {
 	}
 }
 void llgmn::pool_update_val() {
-	for (int mi = 0; mi < modified_input_size; ++mi) {
+	for (int mi = 0; mi < modified_input_dim; ++mi) {
 		for (int cls = 0; cls < class_num; ++cls) {
 			double pre_calc = (output[cls] - teacher_data[cls]) * modified_input[mi] / output[cls];
 			for (int com = 0; com < component_size; ++com) {
@@ -114,11 +114,13 @@ void llgmn::pool_update_val() {
 	}
 }
 void llgmn::update_weight_patch() {
-	for (int mi = 0; mi < modified_input_size; ++mi) {
+	for (int mi = 0; mi < modified_input_dim; ++mi) {
 		for (int cls = 0; cls < class_num; ++cls) {
 			for (int com = 0; com < component_size; ++com) {
-				// ターミナルラーニングではinpsilonのところをTAに変える．
-				//weight[mi][cls][com] += -inpsilon*sum_update_val[mi][cls][com];
+				if (cls == class_num - 1 && com == component_size - 1)
+					continue; // Final weight is always 0;
+				// ターミナルラーニングではlearning_rateのところをTAに変える．
+				//weight[mi][cls][com] += -learning_rate*sum_update_val[mi][cls][com];
 				weight[mi][cls][com] += -terminal_attractor(0.8,sum_update_val,1000)* sum_update_val[mi][cls][com];
 			}
 		}
@@ -126,12 +128,12 @@ void llgmn::update_weight_patch() {
 }
 void llgmn::init_sum_val() {
 	sum_error = 0;
-	sum_update_val = vector<vector<vector<double>>>(modified_input_size, vector<vector<double>>(class_num, vector<double>(component_size, 0)));
+	sum_update_val = vector<vector<vector<double>>>(modified_input_dim, vector<vector<double>>(class_num, vector<double>(component_size, 0)));
 }
 double llgmn::terminal_attractor(double beta, const vector<vector<vector<double>>> &dj_dw,double learning_time) {
 	double eta_t = pow(initial_J,1-beta)/learning_time/(1-beta);
 	double sum_dj_dw = 0;
-	for (int mi = 0; mi < modified_input_size; ++mi) {
+	for (int mi = 0; mi < modified_input_dim; ++mi) {
 		for (int cls = 0; cls < class_num; ++cls) {
 			sum_dj_dw += accumulate(dj_dw[mi][cls].begin(), dj_dw[mi][cls].end(), 0.0, [](double acc, double i) {return acc + pow(i, 2); });
 		}

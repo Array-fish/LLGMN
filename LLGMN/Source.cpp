@@ -16,9 +16,9 @@ int main() {
 	//cin >> component_size;
 	component_size = 2;
 	cout << "学習率を入力してね:";
-	double inpsilon;
-	//cin >> inpsilon;
-	inpsilon = 0.05;// ここ0.1にしたときerrorが-nan(ind)とかになるときがある．原因はわからん
+	double learning_rate;
+	//cin >> learning_rate;
+	learning_rate = 0.05;// ここ0.1にしたときerrorが-nan(ind)とかになるときがある．原因はわからん
 	// データ読み込み
 	vector<vector<double>> input_data;
 	vector<vector<double>> output_data;
@@ -34,7 +34,7 @@ int main() {
 		ofstream ofs("error_data005.csv");
 		ofstream ofs1("output_data000.csv");
 		// データ処理部
-		llgmn LL(input_data[0].size(), output_data[0].size(), component_size, inpsilon);
+		llgmn LL(input_data[0].size(), output_data[0].size(), component_size, learning_rate);
 		for (int i = 0; i < 1000; ++i) {
 			LL.forward(input_data, output_data);
 			cout << "loop:" << i << " error:" << LL.get_error() << endl;
