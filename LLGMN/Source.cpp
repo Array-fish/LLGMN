@@ -8,6 +8,8 @@
 #include<vector>
 #include<algorithm>
 #include"LLGMN.h"
+#include"Parameter.h"
+#include"utils.h"
 using namespace std;
 vector<vector<double>> get_vector_from_file(const string filename);
 int main() {
@@ -20,48 +22,38 @@ int main() {
 	//cin >> learning_rate;
 	learning_rate = 0.05;// ここ0.1にしたときerrorが-nan(ind)とかになるときがある．原因はわからん
 	// データ読み込み
-	vector<vector<double>> input_data;
-	vector<vector<double>> output_data;
-	vector<vector<double>> test_input_data;
-	vector<vector<double>> test_output_data;
+	vector<string> training_data_paths = get_training_data_paths();
+	vector<string> training_label_paths = get_training_label_paths();
+	vector<string> test_data_paths = get_test_data_paths();
+	vector<string> test_label_paths = get_test_label_paths();
 	try {// tryとcatchは特に関係がないので気にしないでください．
 		// データ読み込み
-		input_data = get_vector_from_file("lea_sig.csv");
-		output_data = get_vector_from_file("lea_T_sig.csv");
-		test_input_data = get_vector_from_file("dis_sig.csv");
-		test_output_data = get_vector_from_file("dis_T_sig.csv");
-		// スライド作る用データ取得
-		ofstream ofs("error_data005.csv");
-		ofstream ofs1("output_data000.csv");
-		// データ処理部
-		llgmn LL(input_data[0].size(), output_data[0].size(), component_size, learning_rate);
-		for (int i = 0; i < 1000; ++i) {
-			LL.forward(input_data, output_data);
-			cout << "loop:" << i << " error:" << LL.get_error() << endl;
-			// スライド用データ取得
-			ofs << i << "," << LL.get_error() << endl;
-			vector<double> tmp_output = LL.get_output();
-			for (auto out : tmp_output) {
-				ofs1 << out << ",";
-			}
-			decltype(tmp_output)::iterator max_itr = max_element(tmp_output.begin(),tmp_output.end());
-			for (decltype(tmp_output)::iterator itr = tmp_output.begin(); itr != tmp_output.end(); itr++) {
-				if (itr == max_itr) {
-					ofs1 << "1,";
+		for (int j = 0; j < 7; ++j) {
+			training_data = get_vector_from_file<double>(training_data_paths[j]);
+			training_label = get_vector_from_file<double>(training_label_paths[j]);
+			test_data1 = get_vector_from_file<double>(test_data_paths[j]);
+			test_label1 = get_vector_from_file<double>(test_label_paths[j]);
+			for (int i = 0; i < 20; ++i) {
+				// データ処理部
+				llgmn LL(data_size, class_num, component_size,
+					learning_rate,result_folder,data_name);
+				for (int i = 0; i < 1000; ++i) {
+					LL.forward(training_data, training_label);
+					cout << "loop:" << i << " error:" << LL.get_error() << endl;
+					// スライド用データ取得
+					vector<double> tmp_output = LL.get_output();
+					//decltype(tmp_output)::iterator max_itr = max_element(tmp_output.begin(), tmp_output.end());
+
+					if (i == 0) {
+						LL.set_initial_J();// ターミナルアトラクタ用
+					}
+					LL.backward();
 				}
-				else {
-					ofs1 << "0,";
-				}
+				LL.forward(test_data1, test_label1);
+				cout << "test error:" << LL.get_error() << endl;
+				LL.evaluate(test_data1, test_label1, true, key_test1);
 			}
-			ofs1 << endl;
-			// slide 用終わり
-			if (i == 0) {
-				LL.set_initial_J();// ターミナルアトラクタ用
-			}
-			LL.backward();
 		}
-		LL.forward(test_input_data, test_output_data);
-		cout << "test error:" << LL.get_error() << endl;
 	}
 	catch (const string estr) {
 		cout << estr << endl;

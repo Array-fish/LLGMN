@@ -1,6 +1,7 @@
 #ifndef LLGMN_H
 #define LLGMN_H
 #include<vector>
+#include<string>
 using namespace std;
 class llgmn {
 private:
@@ -9,6 +10,7 @@ private:
 	const int input_dim;
 	const int class_num;
 	double initial_J;// ターミナルアトラクタ用
+	const string time_prefix;
 	// 学習率
 	const double learning_rate;
 	// クラスのコンポーネントの数　コンポーネントの数はクラスごとに変わるのか？
@@ -41,10 +43,28 @@ private:
 	void init_sum_val();
 	void set_teacher_data(const vector<double>& teacher_data);
 	double terminal_attractor(double beta, const vector<vector<vector<double>>>& dj_dw, double learning_time);
+
+	/*!----------------------------------------------------------------------------
+	 @brif 1データだけの全方向計算を行う関数
+
+	 @param [in] data 識別するデータ
+	 @param [out] posterior_probability　識別結果の確率
+	 @attention
+
+	*/
+	void one_forward(vector<double>& data, vector<double>& posterior_probability);
 public:
-	llgmn(const int input_dim, const int class_num, const int component_size, const double inpsilon);
+	llgmn(const int input_dim, const int class_num, const int component_size, const double learning_rate, const string output_dir, const string data_name);
 	virtual ~llgmn() {};
 	// 前方向に計算をしてエネルギー関数を出す．
+	/*!----------------------------------------------------------------------------
+	 @brif 前方向に計算をしてエネルギー関数を内部的に出す．
+
+	 @param [in] input_data 識別するデータ
+	 @param [out] teacher_data 教師データ
+	 @attention
+
+	*/
 	void forward(const vector<vector<double>>& input_data,const vector<vector<double>> &teacher_data);
 	// 誤差伝搬をする
 	void backward();
@@ -52,6 +72,19 @@ public:
 	double get_error() const;
 	vector<double> get_output() const;
 	void set_initial_J();// ターミナルアトラクタ用の最初のエネルギー関数
+	/*!----------------------------------------------------------------------------
+	@brif テストを行う関数
+
+	 学習したパラメータを用いてテストを行う
+	@param [in] test_data(vector<vector<double>>&)   テストデータ
+	@param [in] class_label(const vector<vector<int>>&) データが属するクラスを示すラベル
+	@param [in] output2csv (const bool)
+	@param [in] filenum (const char) テストファイルの番号
+	@return vector<vector<double>>&
+	@attention
+
+	*/
+	vector<vector<double>> evaluate(vector<vector<double>>& test_data, const vector<vector<double>>& class_label, const bool output2csv, string filenum);
 	
 };
 inline double llgmn::get_error() const{
