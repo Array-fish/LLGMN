@@ -8,8 +8,8 @@
 #include<vector>
 #include<algorithm>
 #include"LLGMN.h"
-#include"Parameter.h"
 #include"utils.h"
+#include"Parameter.h"
 using namespace std;
 vector<vector<double>> get_vector_from_file(const string filename);
 int main() {
@@ -31,9 +31,9 @@ int main() {
 		for (int j = 0; j < 7; ++j) {
 			training_data = get_vector_from_file<double>(training_data_paths[j]);
 			training_label = get_vector_from_file<double>(training_label_paths[j]);
-			test_data1 = get_vector_from_file<double>(test_data_paths[j]);
-			test_label1 = get_vector_from_file<double>(test_label_paths[j]);
-			for (int i = 0; i < 20; ++i) {
+			test_data = get_vector_from_file<double>(test_data_paths[j]);
+			test_label = get_vector_from_file<double>(test_label_paths[j]);
+			for (int i = 0; i < 1; ++i) {
 				// ƒf[ƒ^ˆ—•”
 				llgmn LL(data_size, class_num, component_size,
 					learning_rate,result_folder,data_name);
@@ -49,9 +49,11 @@ int main() {
 					}
 					LL.backward();
 				}
-				LL.forward(test_data1, test_label1);
+				LL.forward(test_data, test_label);
 				cout << "test error:" << LL.get_error() << endl;
-				LL.evaluate(test_data1, test_label1, true, key_test1);
+				LL.evaluate(test_data, test_label, true, key_test);
+				LL.out_file_weight();
+
 			}
 		}
 	}
@@ -60,21 +62,4 @@ int main() {
 		return -1;
 	}
 	return 0;
-}
-vector<vector<double>> get_vector_from_file(const string filename) {
-	ifstream ifs(filename);
-	if (ifs.fail()) {
-		throw "Can't open "+ filename;
-	}
-	string str, str1;
-	vector<vector<double>> data;
-	while (getline(ifs, str)) {
-		stringstream ss{ str };
-		vector<double> tmp;
-		while (getline(ss, str1, ',')) {
-			tmp.push_back(stod(str1));
-		}
-		data.push_back(tmp);
-	}
-	return data;
 }

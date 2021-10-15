@@ -1,3 +1,4 @@
+#pragma once
 #ifndef LLGMN_H
 #define LLGMN_H
 #include<vector>
@@ -43,6 +44,7 @@ private:
 	void init_sum_val();
 	void set_teacher_data(const vector<double>& teacher_data);
 	double terminal_attractor(double beta, const vector<vector<vector<double>>>& dj_dw, double learning_time);
+	
 
 	/*!----------------------------------------------------------------------------
 	 @brif 1データだけの全方向計算を行う関数
@@ -65,7 +67,7 @@ public:
 	 @attention
 
 	*/
-	void forward(const vector<vector<double>>& input_data,const vector<vector<double>> &teacher_data);
+	void forward(const vector<vector<double>>& input_data, const vector<vector<double>>& teacher_data);
 	// 誤差伝搬をする
 	void backward();
 	// エネルギー関数の値をとる
@@ -85,12 +87,22 @@ public:
 
 	*/
 	vector<vector<double>> evaluate(vector<vector<double>>& test_data, const vector<vector<double>>& class_label, const bool output2csv, string filenum);
-	
+	/*!----------------------------------------------------------------------------
+	@brif ネットワークパラメータを保存する関数
+
+	 csvファイルにクラス数class_num, コンポーネント数component_num, 入力次元数data_size, 未学習クラスの混合度zeta, 分散の補正項の初期値init_beta,
+	 エネルギー関数の閾値accuracy_max, 学習定数xi, 余事象分布の分散を決めるepsilon, 学習回数の上限max_timesを出力する
+	@return なし
+	@attention
+
+	*/
+	void out_file_weight(const std::string file_suffix = "") const;
+
 };
-inline double llgmn::get_error() const{
+inline double llgmn::get_error() const {
 	return sum_error;
 }
-inline void llgmn::set_teacher_data(const vector<double> &teacher_data){
+inline void llgmn::set_teacher_data(const vector<double>& teacher_data) {
 	this->teacher_data = teacher_data;
 }
 inline void llgmn::set_initial_J() {
